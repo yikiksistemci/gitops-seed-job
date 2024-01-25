@@ -1,0 +1,29 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: gitops-example-one
+  namespace: argocd
+spec:
+  generators:
+  - list:
+      elements:
+      - applicationName: dev
+        namespace: gitops-example-one-dev
+      - applicationName: prod
+        namespace: gitops-example-one-prod
+  template:
+    metadata:
+      name: 'gitops-example-one-{{applicationName}}'
+    spec:
+      project: default
+      syncPolicy: 
+        syncOptions:
+        - CreateNamespace=true 
+      source:
+        repoURL: https://github.com/yikiksistemci/gitops-example-1.git
+        targetRevision: HEAD
+        path: overlays/{{applicationName}}
+      destination:
+        name: in-cluster
+        namespace: "{{namespace}}"
